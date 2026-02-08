@@ -16,6 +16,8 @@ const songs = [
     cardBg: "linear-gradient(180deg, hsl(35, 45%, 80%) 0%, hsl(30, 40%, 72%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(35, 50%, 75%)",
+    // Add your audio file path here (place the file in public/audio/)
+    audioUrl: "/audio/waalian.mp3",
   },
   {
     id: "lag-jaa-gale",
@@ -26,6 +28,8 @@ const songs = [
     cardBg: "linear-gradient(180deg, hsl(150, 50%, 78%) 0%, hsl(150, 45%, 68%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(150, 45%, 70%)",
+    // Add your audio file path here (place the file in public/audio/)
+    audioUrl: "/audio/lag-jaa-gale.mp3",
   },
   {
     id: "bilionera",
@@ -36,6 +40,8 @@ const songs = [
     cardBg: "linear-gradient(180deg, hsl(210, 50%, 78%) 0%, hsl(220, 45%, 68%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(210, 45%, 70%)",
+    // Add your audio file path here (place the file in public/audio/)
+    audioUrl: "/audio/bilionera.mp3",
   },
 ];
 
@@ -58,7 +64,7 @@ const CassetteTape = ({ song, index }: { song: typeof songs[0]; index: number })
     if (isPlaying) {
       stopSong();
     } else {
-      playSong(song.id);
+      playSong(song.id, song.audioUrl);
     }
   };
 
