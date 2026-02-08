@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const HEART_CHARS = ["❤️", "💕", "💖", "💗", "💓", "♡", "🩷"];
+const HEART_CHARS = ["❤️", "💕", "💖", "💗", "💓", "♡", "🩷", "💘", "💝", "✨", "🌸"];
 
 interface Heart {
   id: number;
@@ -15,13 +15,13 @@ const FloatingHearts = () => {
   const [hearts, setHearts] = useState<Heart[]>([]);
 
   useEffect(() => {
-    const initial: Heart[] = Array.from({ length: 15 }, (_, i) => ({
+    const initial: Heart[] = Array.from({ length: 25 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       char: HEART_CHARS[Math.floor(Math.random() * HEART_CHARS.length)],
-      duration: 6 + Math.random() * 8,
-      delay: Math.random() * 10,
-      size: 14 + Math.random() * 18,
+      duration: 8 + Math.random() * 12,
+      delay: Math.random() * 15,
+      size: 12 + Math.random() * 24,
     }));
     setHearts(initial);
   }, []);
@@ -38,6 +38,7 @@ const FloatingHearts = () => {
             "--duration": `${h.duration}s`,
             "--delay": `${h.delay}s`,
             animationDelay: `${h.delay}s`,
+            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
           } as React.CSSProperties}
         >
           {h.char}
