@@ -13,6 +13,7 @@ const songs = [
     song: "Waalian",
     artist: "Harnoor",
     subtitle: "Some feelings feel calm and deep 🥰",
+    audioUrl: "/audio/waalian.mp3", // ← Add your own audio file here
     cardBg: "linear-gradient(180deg, hsl(35, 45%, 80%) 0%, hsl(30, 40%, 72%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(35, 50%, 75%)",
@@ -23,6 +24,7 @@ const songs = [
     song: "Lag Jaa Gale",
     artist: "Sanam",
     subtitle: "Because closeness matters ♡",
+    audioUrl: "/audio/lag-jaa-gale.mp3", // ← Add your own audio file here
     cardBg: "linear-gradient(180deg, hsl(150, 50%, 78%) 0%, hsl(150, 45%, 68%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(150, 45%, 70%)",
@@ -33,6 +35,7 @@ const songs = [
     song: "Bilionera",
     artist: "Otilia",
     subtitle: "When emotions say more than words 😍",
+    audioUrl: "/audio/bilionera.mp3", // ← Add your own audio file here
     cardBg: "linear-gradient(180deg, hsl(210, 50%, 78%) 0%, hsl(220, 45%, 68%) 100%)",
     innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
     reelColor: "hsl(210, 45%, 70%)",
@@ -58,7 +61,7 @@ const CassetteTape = ({ song, index }: { song: typeof songs[0]; index: number })
     if (isPlaying) {
       stopSong();
     } else {
-      playSong(song.id);
+      playSong(song.id, song.audioUrl);
     }
   };
 
