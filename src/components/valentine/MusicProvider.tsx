@@ -1,3 +1,4 @@
+// Music context provider for global audio playback
 import { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from "react";
 
 interface MusicContextType {

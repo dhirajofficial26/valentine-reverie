@@ -1,3 +1,4 @@
+// Music toggle button component
 import { motion, AnimatePresence } from "framer-motion";
 import { useMusicPlayer } from "./MusicProvider";
 
