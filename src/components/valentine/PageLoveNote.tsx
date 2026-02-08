@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import catPortrait from "@/assets/cat-portrait.jpg";
 
 interface PageLoveNoteProps {
@@ -12,28 +12,32 @@ const TypewriterText = ({
   delay = 0, 
   speed = 30,
   className = "",
-  onComplete
+  onComplete,
+  isActive
 }: { 
   text: string; 
   delay?: number; 
   speed?: number;
   className?: string;
   onComplete?: () => void;
+  isActive: boolean;
 }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
   useEffect(() => {
+    if (!isActive) return;
+    
     const startTimer = setTimeout(() => {
       setHasStarted(true);
     }, delay);
 
     return () => clearTimeout(startTimer);
-  }, [delay]);
+  }, [delay, isActive]);
 
   useEffect(() => {
-    if (!hasStarted) return;
+    if (!hasStarted || !isActive) return;
 
     if (displayedText.length < text.length) {
       const timer = setTimeout(() => {
@@ -44,12 +48,14 @@ const TypewriterText = ({
       setIsComplete(true);
       onComplete?.();
     }
-  }, [displayedText, text, speed, hasStarted, isComplete, onComplete]);
+  }, [displayedText, text, speed, hasStarted, isComplete, onComplete, isActive]);
+
+  if (!isActive && !isComplete) return null;
 
   return (
     <motion.p
       initial={{ opacity: 0 }}
-      animate={{ opacity: hasStarted ? 1 : 0 }}
+      animate={{ opacity: 1 }}
       className={className}
     >
       {displayedText}
@@ -66,6 +72,9 @@ const TypewriterText = ({
 
 const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
   const [currentParagraph, setCurrentParagraph] = useState(0);
+  const [completedParagraphs, setCompletedParagraphs] = useState<number[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   
   const paragraphs = [
     "I wanted to do something special today, simply because you matter to me. Valentine's Day isn't about grand gestures—it's about the feeling of choosing someone, even in the quiet moments.",
@@ -74,6 +83,53 @@ const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
     "I don't know where this path leads, but I'd like to take a step forward and see where this connection can grow—at its own pace, in its own time.",
     "No pressure, no expectations—just something sincere, from the heart."
   ];
+
+  // Start typing after initial delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTyping(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Pen writing sound effect
+  useEffect(() => {
+    // Create audio element for pen writing sound
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
+    audioRef.current.volume = 0.15;
+    audioRef.current.loop = true;
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Play/pause sound based on typing state
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    const allComplete = completedParagraphs.length === paragraphs.length;
+    
+    if (isTyping && !allComplete) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isTyping, completedParagraphs.length, paragraphs.length]);
+
+  const handleParagraphComplete = (index: number) => {
+    setCompletedParagraphs(prev => [...prev, index]);
+    
+    // Small delay before starting next paragraph
+    if (index < paragraphs.length - 1) {
+      setTimeout(() => {
+        setCurrentParagraph(index + 1);
+      }, 400);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 relative">
@@ -172,34 +228,56 @@ const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
           />
         </motion.div>
 
+        {/* Growing letter container */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-inner"
+          initial={{ minHeight: "60px" }}
+          animate={{ 
+            minHeight: `${60 + (completedParagraphs.length + 1) * 80}px`
+          }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-inner overflow-hidden"
         >
           <div className="space-y-4 text-foreground/90 leading-relaxed">
-            {paragraphs.map((text, index) => (
-              <TypewriterText
-                key={index}
-                text={text}
-                delay={800 + (index * 100)} // Start after card appears, small gap between paragraphs starting
-                speed={index === currentParagraph ? 25 : 15} // Current paragraph types slower, others catch up
-                className={index === paragraphs.length - 1 ? "font-medium" : ""}
-                onComplete={() => {
-                  if (index === currentParagraph && currentParagraph < paragraphs.length - 1) {
-                    setCurrentParagraph(index + 1);
-                  }
-                }}
-              />
-            ))}
+            <AnimatePresence mode="sync">
+              {paragraphs.map((text, index) => (
+                <TypewriterText
+                  key={index}
+                  text={text}
+                  delay={100}
+                  speed={25}
+                  className={index === paragraphs.length - 1 ? "font-medium" : ""}
+                  isActive={index === currentParagraph}
+                  onComplete={() => handleParagraphComplete(index)}
+                />
+              ))}
+            </AnimatePresence>
           </div>
         </motion.div>
 
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 mb-4">
+          {paragraphs.map((_, index) => (
+            <motion.div
+              key={index}
+              initial={{ scale: 0 }}
+              animate={{ 
+                scale: 1,
+                backgroundColor: completedParagraphs.includes(index) 
+                  ? "hsl(var(--primary))" 
+                  : index === currentParagraph 
+                    ? "hsl(var(--primary) / 0.5)"
+                    : "hsl(var(--muted))"
+              }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+              className="w-2 h-2 rounded-full"
+            />
+          ))}
+        </div>
+
         <motion.p
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.3 }}
+          animate={{ opacity: completedParagraphs.length === paragraphs.length ? 1 : 0.3 }}
+          transition={{ duration: 0.5 }}
           className="text-right font-script text-3xl text-primary"
         >
           Always ♡
@@ -208,12 +286,16 @@ const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
 
       <motion.button
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ 
+          opacity: completedParagraphs.length === paragraphs.length ? 1 : 0.5,
+          y: 0 
+        }}
         transition={{ delay: 1.4 }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: completedParagraphs.length === paragraphs.length ? 1.05 : 1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onNext}
-        className="premium-btn text-lg"
+        disabled={completedParagraphs.length !== paragraphs.length}
+        className="premium-btn text-lg disabled:cursor-not-allowed"
       >
         Keep Going 🐝 →
       </motion.button>
