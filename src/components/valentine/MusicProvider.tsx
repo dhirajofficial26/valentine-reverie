@@ -9,7 +9,7 @@ interface MusicContextType {
   currentSong: string | null;
   songProgress: number;
   songDuration: number;
-  playSong: (songId: string) => void;
+  playSong: (songId: string, audioUrl: string) => void;
   stopSong: () => void;
   isSongPlaying: (songId: string) => boolean;
 }
@@ -87,16 +87,16 @@ export const MusicProvider = ({ children }: { children: ReactNode }) => {
     setVolumeState(vol);
   };
 
-  // Play a specific song (uses the same background music for demo)
-  const playSong = useCallback((songId: string) => {
+  // Play a specific song with its own audio file
+  const playSong = useCallback((songId: string, audioUrl: string) => {
     // Stop any currently playing song
     if (songRef.current) {
       songRef.current.pause();
       songRef.current = null;
     }
 
-    // Create new audio for the song (reusing background music for demo)
-    songRef.current = new Audio("/audio/background-music.mp3");
+    // Create new audio for the song using its specific audio URL
+    songRef.current = new Audio(audioUrl);
     songRef.current.volume = volume;
     
     // Set up progress tracking
