@@ -1,11 +1,80 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import catPortrait from "@/assets/cat-portrait.jpg";
 
 interface PageLoveNoteProps {
   onNext: () => void;
 }
 
+// Typewriter component for smooth character-by-character animation
+const TypewriterText = ({ 
+  text, 
+  delay = 0, 
+  speed = 30,
+  className = "",
+  onComplete
+}: { 
+  text: string; 
+  delay?: number; 
+  speed?: number;
+  className?: string;
+  onComplete?: () => void;
+}) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  useEffect(() => {
+    const startTimer = setTimeout(() => {
+      setHasStarted(true);
+    }, delay);
+
+    return () => clearTimeout(startTimer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    if (displayedText.length < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(text.slice(0, displayedText.length + 1));
+      }, speed);
+      return () => clearTimeout(timer);
+    } else if (!isComplete) {
+      setIsComplete(true);
+      onComplete?.();
+    }
+  }, [displayedText, text, speed, hasStarted, isComplete, onComplete]);
+
+  return (
+    <motion.p
+      initial={{ opacity: 0 }}
+      animate={{ opacity: hasStarted ? 1 : 0 }}
+      className={className}
+    >
+      {displayedText}
+      {hasStarted && !isComplete && (
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="inline-block w-0.5 h-5 bg-primary/60 ml-0.5 align-middle"
+        />
+      )}
+    </motion.p>
+  );
+};
+
 const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
+  const [currentParagraph, setCurrentParagraph] = useState(0);
+  
+  const paragraphs = [
+    "I wanted to do something special today, simply because you matter to me. Valentine's Day isn't about grand gestures—it's about the feeling of choosing someone, even in the quiet moments.",
+    "I admire the way you care, understand, and bring calm positivity into my world. Being around you feels safe, natural, and real.",
+    "I appreciate your honesty, your kindness, and the way you show up as yourself.",
+    "I don't know where this path leads, but I'd like to take a step forward and see where this connection can grow—at its own pace, in its own time.",
+    "No pressure, no expectations—just something sincere, from the heart."
+  ];
+
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 relative">
       {/* Floating decorations */}
@@ -110,42 +179,20 @@ const PageLoveNote = ({ onNext }: PageLoveNoteProps) => {
           className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-inner"
         >
           <div className="space-y-4 text-foreground/90 leading-relaxed">
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              I wanted to do something special today, simply because you matter to me. Valentine's Day isn't about grand gestures—it's about the feeling of choosing someone, even in the quiet moments.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.9 }}
-            >
-              I admire the way you care, understand, and bring calm positivity into my world. Being around you feels safe, natural, and real.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1 }}
-            >
-              I appreciate your honesty, your kindness, and the way you show up as yourself.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.1 }}
-            >
-              I don't know where this path leads, but I'd like to take a step forward and see where this connection can grow—at its own pace, in its own time.
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.2 }}
-              className="font-medium"
-            >
-              No pressure, no expectations—just something sincere, from the heart.
-            </motion.p>
+            {paragraphs.map((text, index) => (
+              <TypewriterText
+                key={index}
+                text={text}
+                delay={800 + (index * 100)} // Start after card appears, small gap between paragraphs starting
+                speed={index === currentParagraph ? 25 : 15} // Current paragraph types slower, others catch up
+                className={index === paragraphs.length - 1 ? "font-medium" : ""}
+                onComplete={() => {
+                  if (index === currentParagraph && currentParagraph < paragraphs.length - 1) {
+                    setCurrentParagraph(index + 1);
+                  }
+                }}
+              />
+            ))}
           </div>
         </motion.div>
 
