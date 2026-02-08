@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         script: ["Dancing Script", "cursive"],
+        display: ["Playfair Display", "serif"],
         body: ["Quicksand", "sans-serif"],
       },
       colors: {
@@ -55,10 +56,12 @@ export default {
           pink: "hsl(var(--valentine-pink))",
           "dark-pink": "hsl(var(--valentine-dark-pink))",
           light: "hsl(var(--valentine-light))",
-          card: "hsl(var(--valentine-card))",
+          rose: "hsl(var(--valentine-rose))",
+          blush: "hsl(var(--valentine-blush))",
           purple: "hsl(var(--valentine-purple))",
-          green: "hsl(var(--valentine-green))",
+          lavender: "hsl(var(--valentine-lavender))",
           gold: "hsl(var(--valentine-gold))",
+          cream: "hsl(var(--valentine-cream))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
