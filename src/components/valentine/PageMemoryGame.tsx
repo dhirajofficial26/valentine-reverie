@@ -283,13 +283,24 @@ const PageMemoryGame = ({ onNext }: PageMemoryGameProps) => {
                     : "linear-gradient(135deg, hsl(340, 85%, 55%), hsl(350, 80%, 60%))",
                 }}
               >
-                <motion.span
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-2xl font-bold text-white"
-                >
-                  ?
-                </motion.span>
+                {card.matched ? (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", damping: 10 }}
+                    className="text-3xl md:text-4xl"
+                  >
+                    {card.emoji}
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-2xl font-bold text-white"
+                  >
+                    ?
+                  </motion.span>
+                )}
               </div>
               <div
                 className="memory-card-front glass-card"
