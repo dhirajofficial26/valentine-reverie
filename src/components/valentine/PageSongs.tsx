@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMusicPlayer } from "./MusicProvider";
 
 interface PageSongsProps {
   onNext: () => void;
@@ -7,166 +8,313 @@ interface PageSongsProps {
 
 const songs = [
   {
+    id: "waalian",
     label: "SIDE A",
     song: "Waalian",
     artist: "Harnoor",
     subtitle: "Some feelings feel calm and deep 🥰",
-    cardBg: "linear-gradient(180deg, hsl(35, 40%, 78%) 0%, hsl(30, 35%, 70%) 100%)",
-    innerBg: "linear-gradient(180deg, hsl(340, 70%, 92%) 0%, hsl(340, 60%, 88%) 100%)",
+    cardBg: "linear-gradient(180deg, hsl(35, 45%, 80%) 0%, hsl(30, 40%, 72%) 100%)",
+    innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
+    reelColor: "hsl(35, 50%, 75%)",
   },
   {
+    id: "lag-jaa-gale",
     label: "SIDE A",
     song: "Lag Jaa Gale",
     artist: "Sanam",
     subtitle: "Because closeness matters ♡",
-    cardBg: "linear-gradient(180deg, hsl(150, 45%, 75%) 0%, hsl(150, 40%, 65%) 100%)",
-    innerBg: "linear-gradient(180deg, hsl(340, 70%, 92%) 0%, hsl(340, 60%, 88%) 100%)",
+    cardBg: "linear-gradient(180deg, hsl(150, 50%, 78%) 0%, hsl(150, 45%, 68%) 100%)",
+    innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
+    reelColor: "hsl(150, 45%, 70%)",
   },
   {
+    id: "bilionera",
     label: "SIDE A",
     song: "Bilionera",
     artist: "Otilia",
     subtitle: "When emotions say more than words 😍",
-    cardBg: "linear-gradient(180deg, hsl(210, 45%, 75%) 0%, hsl(220, 40%, 65%) 100%)",
-    innerBg: "linear-gradient(180deg, hsl(340, 70%, 92%) 0%, hsl(340, 60%, 88%) 100%)",
+    cardBg: "linear-gradient(180deg, hsl(210, 50%, 78%) 0%, hsl(220, 45%, 68%) 100%)",
+    innerBg: "linear-gradient(180deg, hsl(340, 75%, 94%) 0%, hsl(340, 65%, 90%) 100%)",
+    reelColor: "hsl(210, 45%, 70%)",
   },
 ];
 
 const CassetteTape = ({ song, index }: { song: typeof songs[0]; index: number }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { playSong, stopSong, isSongPlaying, songProgress, songDuration } = useMusicPlayer();
+  const isPlaying = isSongPlaying(song.id);
+  const [displayTime, setDisplayTime] = useState("0:00");
+
+  useEffect(() => {
+    if (isPlaying && songProgress > 0) {
+      const mins = Math.floor(songProgress / 60);
+      const secs = Math.floor(songProgress % 60);
+      setDisplayTime(`${mins}:${secs.toString().padStart(2, '0')}`);
+    } else {
+      setDisplayTime("0:00");
+    }
+  }, [isPlaying, songProgress]);
+
+  const handleToggle = () => {
+    if (isPlaying) {
+      stopSong();
+    } else {
+      playSong(song.id);
+    }
+  };
+
+  const progress = songDuration > 0 ? (songProgress / songDuration) * 100 : 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50, rotateX: 15 }}
+      initial={{ opacity: 0, y: 60, rotateX: 20 }}
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ delay: index * 0.2, duration: 0.6, type: "spring" }}
-      whileHover={{ y: -8, scale: 1.02, rotateY: 2 }}
+      transition={{ delay: index * 0.25, duration: 0.7, type: "spring", stiffness: 100 }}
+      whileHover={{ 
+        y: -12, 
+        scale: 1.03, 
+        rotateY: 3,
+        transition: { duration: 0.3 }
+      }}
       className="relative cursor-pointer"
-      style={{ perspective: "1000px" }}
+      style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
     >
+      {/* Card shadow */}
+      <motion.div 
+        className="absolute -inset-2 rounded-[2rem] opacity-30 blur-xl"
+        style={{ background: song.cardBg }}
+        animate={isPlaying ? { scale: [1, 1.05, 1] } : {}}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+      
       {/* Main cassette card */}
       <div
-        className="rounded-3xl p-5 shadow-2xl relative overflow-hidden"
+        className="rounded-[1.75rem] p-6 shadow-2xl relative overflow-hidden border border-white/20"
         style={{ background: song.cardBg }}
       >
-        {/* Corner screws */}
-        <div className="absolute top-3 left-3 w-2 h-2 rounded-full bg-black/20" />
-        <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-black/20" />
-        <div className="absolute bottom-3 left-3 w-2 h-2 rounded-full bg-black/20" />
-        <div className="absolute bottom-3 right-3 w-2 h-2 rounded-full bg-black/20" />
+        {/* Shine effect */}
+        <motion.div
+          className="absolute inset-0 opacity-20"
+          style={{
+            background: "linear-gradient(135deg, transparent 30%, white 50%, transparent 70%)",
+          }}
+          animate={{ x: ["-100%", "200%"] }}
+          transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+        />
+        
+        {/* Corner screws with metallic effect */}
+        {[
+          "top-4 left-4",
+          "top-4 right-4", 
+          "bottom-4 left-4",
+          "bottom-4 right-4"
+        ].map((pos, i) => (
+          <div 
+            key={i}
+            className={`absolute ${pos} w-3 h-3 rounded-full shadow-inner`}
+            style={{
+              background: "linear-gradient(135deg, #d4d4d4, #9a9a9a)",
+              boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)"
+            }}
+          />
+        ))}
 
         {/* Side A label */}
-        <div className="text-center mb-3">
-          <span className="text-xs font-bold tracking-[0.3em] text-black/40 uppercase">
+        <div className="text-center mb-4">
+          <span className="text-xs font-bold tracking-[0.4em] text-black/35 uppercase">
             {song.label}
           </span>
         </div>
 
         {/* Inner pink section */}
-        <div
-          className="rounded-2xl p-5 relative"
+        <motion.div
+          className="rounded-2xl p-6 relative shadow-lg border border-white/30"
           style={{ background: song.innerBg }}
+          animate={isPlaying ? { 
+            boxShadow: [
+              "0 4px 20px rgba(236, 72, 153, 0.2)",
+              "0 8px 30px rgba(236, 72, 153, 0.4)",
+              "0 4px 20px rgba(236, 72, 153, 0.2)"
+            ]
+          } : {}}
+          transition={{ duration: 1.5, repeat: Infinity }}
         >
           {/* Song info */}
-          <div className="text-center mb-4">
-            <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-1">
+          <div className="text-center mb-5">
+            <motion.h3 
+              className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2"
+              animate={isPlaying ? { scale: [1, 1.02, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               {song.song}
-            </h3>
-            <p className="text-primary text-sm font-medium">{song.subtitle}</p>
+            </motion.h3>
+            <p className="text-primary font-medium text-sm">{song.subtitle}</p>
           </div>
 
           {/* Cassette tape window */}
-          <div className="bg-white/80 rounded-xl p-4 flex items-center justify-between shadow-inner">
+          <div className="bg-white/90 rounded-2xl p-5 flex items-center justify-between shadow-inner border border-black/5">
             {/* Left reel */}
             <motion.div
               animate={isPlaying ? { rotate: 360 } : {}}
-              transition={isPlaying ? { duration: 2, repeat: Infinity, ease: "linear" } : {}}
+              transition={isPlaying ? { duration: 1.5, repeat: Infinity, ease: "linear" } : {}}
               className="relative"
             >
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border-4 border-amber-200 bg-white flex items-center justify-center">
-                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-amber-100 border-2 border-amber-200 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-amber-300" />
+              <div 
+                className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-md"
+                style={{ 
+                  background: `radial-gradient(circle, white 30%, ${song.reelColor} 70%)`,
+                  border: "3px solid rgba(255,255,255,0.8)"
+                }}
+              >
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/80 border-2 border-black/10 flex items-center justify-center shadow-inner">
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
                 </div>
               </div>
-              {/* Reel teeth */}
-              {[0, 60, 120, 180, 240, 300].map((deg) => (
+              {/* Reel spokes */}
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
                 <div
                   key={deg}
-                  className="absolute w-1 h-2 bg-amber-300/60 rounded-full"
+                  className="absolute w-0.5 h-2 bg-black/15 rounded-full"
                   style={{
                     top: "50%",
                     left: "50%",
-                    transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-10px)`,
+                    transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-14px)`,
                   }}
                 />
               ))}
             </motion.div>
 
-            {/* Tape */}
-            <div className="flex-1 mx-3 h-6 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 rounded relative overflow-hidden">
-              {isPlaying && (
+            {/* Tape with progress */}
+            <div className="flex-1 mx-4 relative">
+              <div className="h-8 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-lg relative overflow-hidden shadow-inner">
+                {/* Progress indicator */}
                 <motion.div
-                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{ x: ["-100%", "400%"] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary/40 to-primary/20"
+                  style={{ width: `${progress}%` }}
+                  transition={{ duration: 0.1 }}
                 />
-              )}
+                
+                {/* Tape shine animation */}
+                <AnimatePresence>
+                  {isPlaying && (
+                    <motion.div
+                      className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                      initial={{ x: "-100%" }}
+                      animate={{ x: "500%" }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                    />
+                  )}
+                </AnimatePresence>
+                
+                {/* Tape lines */}
+                <div className="absolute inset-0 flex items-center justify-around opacity-20">
+                  {Array(8).fill(0).map((_, i) => (
+                    <div key={i} className="w-px h-full bg-white" />
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Right reel */}
             <motion.div
               animate={isPlaying ? { rotate: 360 } : {}}
-              transition={isPlaying ? { duration: 2, repeat: Infinity, ease: "linear" } : {}}
+              transition={isPlaying ? { duration: 1.5, repeat: Infinity, ease: "linear" } : {}}
               className="relative"
             >
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border-4 border-amber-200 bg-white flex items-center justify-center">
-                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-amber-100 border-2 border-amber-200 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-amber-300" />
+              <div 
+                className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-md"
+                style={{ 
+                  background: `radial-gradient(circle, white 30%, ${song.reelColor} 70%)`,
+                  border: "3px solid rgba(255,255,255,0.8)"
+                }}
+              >
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/80 border-2 border-black/10 flex items-center justify-center shadow-inner">
+                  <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
                 </div>
               </div>
-              {[0, 60, 120, 180, 240, 300].map((deg) => (
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
                 <div
                   key={deg}
-                  className="absolute w-1 h-2 bg-amber-300/60 rounded-full"
+                  className="absolute w-0.5 h-2 bg-black/15 rounded-full"
                   style={{
                     top: "50%",
                     left: "50%",
-                    transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-10px)`,
+                    transform: `translate(-50%, -50%) rotate(${deg}deg) translateY(-14px)`,
                   }}
                 />
               ))}
             </motion.div>
           </div>
 
-          {/* Heart icon */}
+          {/* Heart icon - animated when playing */}
           <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="absolute bottom-3 right-3 text-primary/40 text-xl"
+            animate={isPlaying ? { 
+              scale: [1, 1.3, 1],
+              rotate: [0, 10, -10, 0]
+            } : { scale: [1, 1.1, 1] }}
+            transition={{ duration: isPlaying ? 0.8 : 1.5, repeat: Infinity }}
+            className="absolute bottom-4 right-4 text-primary/60 text-2xl"
           >
-            ♡
+            {isPlaying ? "💕" : "♡"}
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Play button and time */}
-        <div className="flex items-center justify-between mt-4 px-2">
-          <span className="text-sm font-medium text-black/50 bg-white/50 px-3 py-1 rounded-full">
-            0:00
-          </span>
+        <div className="flex items-center justify-between mt-5 px-3">
+          <motion.span 
+            className="text-sm font-bold text-black/60 bg-white/60 px-4 py-2 rounded-full shadow-inner"
+            animate={isPlaying ? { opacity: [0.7, 1, 0.7] } : {}}
+            transition={{ duration: 1, repeat: Infinity }}
+          >
+            {displayTime}
+          </motion.span>
           
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl"
-            style={{ background: "linear-gradient(135deg, hsl(340, 85%, 55%), hsl(350, 80%, 60%))" }}
+            onClick={handleToggle}
+            className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl relative overflow-hidden"
+            style={{ 
+              background: isPlaying 
+                ? "linear-gradient(135deg, hsl(340, 85%, 50%), hsl(350, 80%, 55%))"
+                : "linear-gradient(135deg, hsl(340, 85%, 60%), hsl(350, 80%, 65%))"
+            }}
           >
-            <span className="text-white text-xl ml-1">
+            {/* Button shine */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-t from-transparent to-white/30"
+              style={{ borderRadius: "inherit" }}
+            />
+            
+            {/* Icon */}
+            <motion.span 
+              className="text-white text-2xl relative z-10"
+              animate={isPlaying ? { scale: [1, 0.9, 1] } : {}}
+              transition={{ duration: 0.5, repeat: Infinity }}
+            >
               {isPlaying ? "⏸" : "▶"}
-            </span>
+            </motion.span>
+            
+            {/* Ripple effect when playing */}
+            {isPlaying && (
+              <motion.div
+                className="absolute inset-0 rounded-full border-2 border-white"
+                animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            )}
           </motion.button>
 
-          <span className="text-sm text-black/30">♡</span>
+          <motion.span 
+            className="text-xl"
+            animate={isPlaying ? { 
+              scale: [1, 1.4, 1],
+              rotate: [0, 15, -15, 0]
+            } : {}}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            {isPlaying ? "❤️" : "♡"}
+          </motion.span>
         </div>
       </div>
     </motion.div>
@@ -175,72 +323,77 @@ const CassetteTape = ({ song, index }: { song: typeof songs[0]; index: number })
 
 const PageSongs = ({ onNext }: PageSongsProps) => {
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8">
-      {/* Floating music notes */}
-      <motion.div
-        animate={{ y: [0, -10, 0], rotate: [-5, 5, -5] }}
-        transition={{ duration: 3, repeat: Infinity }}
-        className="absolute top-20 left-10 text-2xl text-muted-foreground/40"
-      >
-        ♪
-      </motion.div>
-      <motion.div
-        animate={{ y: [0, -15, 0], rotate: [5, -5, 5] }}
-        transition={{ duration: 4, repeat: Infinity, delay: 1 }}
-        className="absolute top-32 right-16 text-3xl text-muted-foreground/30"
-      >
-        ♫
-      </motion.div>
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
-        className="absolute top-40 right-1/4 text-xl text-primary/20"
-      >
-        🎧
-      </motion.div>
+    <div className="min-h-screen flex flex-col items-center px-4 py-8 relative">
+      {/* Floating music notes - more animated */}
+      {[
+        { icon: "♪", left: "5%", top: "15%", delay: 0, size: "2xl" },
+        { icon: "♫", left: "90%", top: "20%", delay: 1, size: "3xl" },
+        { icon: "🎧", left: "80%", top: "35%", delay: 0.5, size: "xl" },
+        { icon: "♪", left: "10%", top: "60%", delay: 1.5, size: "2xl" },
+        { icon: "🎵", left: "85%", top: "70%", delay: 2, size: "xl" },
+      ].map((note, i) => (
+        <motion.div
+          key={i}
+          className={`absolute text-${note.size} text-primary/30`}
+          style={{ left: note.left, top: note.top }}
+          animate={{ 
+            y: [0, -20, 0], 
+            rotate: [-10, 10, -10],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ 
+            duration: 3 + i * 0.5, 
+            repeat: Infinity, 
+            delay: note.delay 
+          }}
+        >
+          {note.icon}
+        </motion.div>
+      ))}
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10"
+        className="text-center mb-12"
       >
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="font-script text-xl md:text-2xl text-muted-foreground mb-2"
+          className="font-script text-xl md:text-2xl text-muted-foreground mb-3"
         >
           Hope they make you smile
         </motion.p>
         <motion.h1
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: "spring" }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
           className="font-display text-4xl md:text-5xl lg:text-6xl font-bold italic"
           style={{
-            background: "linear-gradient(135deg, hsl(340, 85%, 50%), hsl(350, 80%, 55%))",
+            background: "linear-gradient(135deg, hsl(340, 85%, 50%), hsl(350, 80%, 55%), hsl(20, 75%, 55%))",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
+            textShadow: "0 4px 30px hsl(340 85% 50% / 0.3)"
           }}
         >
           Songs That Feel Like Valentine's Day
         </motion.h1>
       </motion.div>
 
-      <div className="flex flex-col gap-8 max-w-md w-full mb-10">
+      <div className="flex flex-col gap-10 max-w-lg w-full mb-12">
         {songs.map((song, i) => (
-          <CassetteTape key={i} song={song} index={i} />
+          <CassetteTape key={song.id} song={song} index={i} />
         ))}
       </div>
 
       <motion.button
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        whileHover={{ scale: 1.05 }}
+        transition={{ delay: 1 }}
+        whileHover={{ scale: 1.08, y: -3 }}
         whileTap={{ scale: 0.95 }}
         onClick={onNext}
-        className="premium-btn text-lg"
+        className="premium-btn text-lg px-10 py-4"
       >
         Continue 💕 →
       </motion.button>
