@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-const HEART_CHARS = ["❤️", "💕", "💖", "💗", "💓", "♡", "🩷", "💘", "💝", "✨", "🌸"];
+const HEART_CHARS = ["❤️", "💕", "💖", "💗", "♡", "🩷"];
 
 interface Heart {
   id: number;
@@ -12,34 +12,30 @@ interface Heart {
 }
 
 const FloatingHearts = () => {
-  const [hearts, setHearts] = useState<Heart[]>([]);
-
-  useEffect(() => {
-    const initial: Heart[] = Array.from({ length: 25 }, (_, i) => ({
+  // Reduced from 25 to 10 for better performance
+  const hearts = useMemo<Heart[]>(() => 
+    Array.from({ length: 10 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       char: HEART_CHARS[Math.floor(Math.random() * HEART_CHARS.length)],
-      duration: 8 + Math.random() * 12,
-      delay: Math.random() * 15,
-      size: 12 + Math.random() * 24,
-    }));
-    setHearts(initial);
-  }, []);
+      duration: 12 + Math.random() * 8, // Slower animations
+      delay: Math.random() * 10,
+      size: 14 + Math.random() * 16,
+    })), []
+  );
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 will-change-auto">
       {hearts.map((h) => (
         <span
           key={h.id}
-          className="absolute animate-float-heart"
+          className="absolute animate-float-heart opacity-60"
           style={{
             left: `${h.left}%`,
             fontSize: `${h.size}px`,
-            "--duration": `${h.duration}s`,
-            "--delay": `${h.delay}s`,
+            animationDuration: `${h.duration}s`,
             animationDelay: `${h.delay}s`,
-            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
-          } as React.CSSProperties}
+          }}
         >
           {h.char}
         </span>
