@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { introConfig } from "@/config/valentineConfig";
 
@@ -9,6 +9,8 @@ interface PageIntroProps {
 const PageIntro = ({ onNext }: PageIntroProps) => {
   const [stage, setStage] = useState<"loading" | "video" | "ready">("loading");
   const [progress, setProgress] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -91,15 +93,24 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
           <h1 className="valentine-title text-center mb-4">{introConfig.videoTitle}</h1>
           <p className="valentine-subtitle text-center mb-6">{introConfig.videoSubtitle}</p>
           
-          <div className="glass-card rounded-3xl overflow-hidden premium-shadow">
+          <div className="glass-card rounded-3xl overflow-hidden premium-shadow relative group">
             <video
+              ref={videoRef}
               src={introConfig.video}
               autoPlay
+              loop
+              muted={isMuted}
               playsInline
-              controls
-              onEnded={() => setStage("ready")}
               className="w-full"
             />
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsMuted(!isMuted)}
+              className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            >
+              {isMuted ? "🔇" : "🔊"}
+            </motion.button>
           </div>
 
           <motion.button
