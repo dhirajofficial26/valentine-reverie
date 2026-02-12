@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import catPortrait from "@/assets/cat-portrait.jpg";
-import valentineVideo from "@/assets/valentine-video.mp4";
+import { introConfig } from "@/config/valentineConfig";
 
 interface PageIntroProps {
   onNext: () => void;
@@ -36,7 +35,7 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
         >
           <div className="absolute inset-0 rounded-full premium-gradient blur-2xl opacity-50 animate-pulse-glow" />
           <img
-            src={catPortrait}
+            src={introConfig.profileImage}
             alt="Welcome"
             className="relative w-40 h-40 md:w-56 md:h-56 rounded-full object-cover border-4 border-white/50 shadow-2xl"
           />
@@ -49,10 +48,10 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
           className="text-center mt-8"
         >
           <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
-            Something Special
+            {introConfig.loadingTitle}
           </h2>
           <p className="text-muted-foreground mb-8 font-script text-xl">
-            is being prepared just for you...
+            {introConfig.loadingSubtitle}
           </p>
 
           <div className="w-64 md:w-80 h-3 glass-card rounded-full overflow-hidden mb-4">
@@ -89,12 +88,12 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-2xl"
         >
-          <h1 className="valentine-title text-center mb-4">For You 💕</h1>
-          <p className="valentine-subtitle text-center mb-6">A special message...</p>
+          <h1 className="valentine-title text-center mb-4">{introConfig.videoTitle}</h1>
+          <p className="valentine-subtitle text-center mb-6">{introConfig.videoSubtitle}</p>
           
           <div className="glass-card rounded-3xl overflow-hidden premium-shadow">
             <video
-              src={valentineVideo}
+              src={introConfig.video}
               autoPlay
               playsInline
               controls
@@ -109,7 +108,7 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
             onClick={() => setStage("ready")}
             className="premium-btn w-full mt-6"
           >
-            Continue to the Journey ✨
+            {introConfig.videoContinueBtn}
           </motion.button>
         </motion.div>
       </div>
@@ -132,12 +131,11 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
           <span className="text-6xl md:text-8xl">💝</span>
         </motion.div>
 
-        <p className="valentine-subtitle mb-2">Welcome to...</p>
-        <h1 className="valentine-title mb-6">Your Valentine Journey</h1>
+        <p className="valentine-subtitle mb-2">{introConfig.welcomeSubtitle}</p>
+        <h1 className="valentine-title mb-6">{introConfig.welcomeTitle}</h1>
         
         <p className="text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed">
-          I've prepared something special for you today. 
-          Get ready for games, memories, and lots of love! 💕
+          {introConfig.welcomeMessage}
         </p>
 
         <motion.button
@@ -146,7 +144,7 @@ const PageIntro = ({ onNext }: PageIntroProps) => {
           onClick={onNext}
           className="premium-btn text-lg"
         >
-          Begin the Journey 🐝 →
+          {introConfig.startBtn}
         </motion.button>
       </motion.div>
     </div>
